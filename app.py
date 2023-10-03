@@ -42,7 +42,7 @@ def signIn():
             'name': user.name,
             'email': user.email
         }
-        return jsonify(user_data)
+        return jsonify(user_data,{'message': 'Login Successful'})
     else:
         return jsonify({'message': 'Invalid Credentials'})
 
