@@ -24,11 +24,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 migrate = Migrate(app, db)
 
 db.init_app(app)
-# with app.app_context():
-#     user = User.query.filter(User.id == 1).first()
-#     article = Article(user=user, author=user.name, title='My Article', body='This is the article body.')
-#     db.session.add(article)
-#     db.session.commit()
+
 
 
 
@@ -109,7 +105,66 @@ def create_user():
     }
 
     return jsonify(new_user_data)
+@app.route('/signIn', methods=['POST'])
+def signIn():
+    user = User.query.filter(User.email == request.json['email'], User.password == request.json['password']).first()
+    if user is not None:
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        }
+        return jsonify(user_data,{'message': 'Login Successful'})
+    else:
+        return jsonify({'message': 'Invalid Credentials'})
 
+@app.route('/donateFunds/<int:id>', methods=['POST'])
+def donate_funds(id):
+    user = User.query.filter(User.id == id).first()
+    donation = Donation(user=user, type="Cash", amount=request.json['amount'])
+    db.session.add(donation)
+    db.session.commit()
+
+    donation_data = {
+            'id': donation.id,
+            'user_id': donation.user_id,
+            'type': donation.type,
+            'amount': donation.amount,
+            'date': donation.date}
+    
+    return jsonify(donation_data)
+@app.route('/donateFood/<int:id>', methods=['POST'])
+def donate_food(id):
+    user = User.query.filter(User.id == id).first()
+    donation = Donation(user=user, type="Food", amount=request.json['amount'])
+    db.session.add(donation)
+    db.session.commit()
+
+    donation_data = {
+            'id': donation.id,
+            'user_id': donation.user_id,
+            'type': donation.type,
+            'amount': donation.amount,
+            'date': donation.date}
+    
+    return jsonify(donation_data)
+
+@app.route('/userDonations/<int:id>')
+def get_user_donations(id):
+    user = User.query.filter(User.id == id).first()
+    donations = user.donations
+    donation_list = []
+    for donation in donations:
+        donation_list.append({
+                    'id': donation.id,
+                    'user_id': donation.user_id,
+                    'type': donation.type,
+                    'amount': donation.amount,
+                    'date': donation.date})
+    return jsonify(donation_list)    
+        
+    
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
