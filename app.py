@@ -1,8 +1,10 @@
 from flask import Flask,request,jsonify
 from flask_migrate import Migrate
 from models import User,db,Donation,Article
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 
 # Add a donation for the user
